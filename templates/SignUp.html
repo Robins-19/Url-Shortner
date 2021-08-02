@@ -7,17 +7,19 @@
                 <img src="/static/user-Icon.png">
                 <h1>SIGN UP FORM</h1>
                 <form action="register" method="post" enctype="multipart/form-data" onsubmit="return test()">
-                   <input type="email" class="input-box" name="email" placeholder="Your Email">
-                   <input type="TEXT" class="input-box" name="uname"placeholder="Your name">
-                   <input type="file" name="file">
-                    <input type="password" class="input-box" name="pwd" id="pwd" placeholder="YoUR password">
-                    <input type="password" class="input-box"  id="cpwd" placeholder="confirm password">
-                   <p><span><input type="checkbox"></span>I Agree to the terms of services.</p>
+                   <input type="email" class="input-box" name="email" placeholder="Your Email" required>
+                   <input type="TEXT" class="input-box" name="uname"placeholder="Your name" required>
+
+                    <input type="password" class="input-box" name="pwd" id="pwd" placeholder="YoUR password" required>
+                    <input type="password" class="input-box"  id="cpwd" placeholder="confirm password" required>
+                   <p><span><input type="checkbox" required></span>I Agree to the terms of services. </p>
                    <button type="submit" class="signup-btn">SIGN UP</button>
                    <hr> 
-                   <p class="or">OR</p> 
-                  <button type="button" class="twitter-btn">LOGIN WITH TWITTER</button>
-                  <p>Do you have an account ? <a href="#">SIGN IN</a></p> 
+                   <p class="or">OR</p>
+
+                    </form>
+                <form action="/login">
+                    <button type="submit" class="signup-btn">Do you have an account ? SIGN IN</button>
                     </form>
         </body>
         <script>

@@ -1,19 +1,18 @@
 from datetime import datetime
 import requests
-from flask import Flask, render_template, request, redirect, session, make_response, send_file
+from flask import Flask, render_template, request, redirect, session, make_response, send_file,jsonify
 from mysql.connector import connect
 from flask_mail import Mail, Message
 import random
 from random import randint
 import string
-otp=0
 app = Flask(__name__)
 app.config.update(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=465,
     MAIL_USE_SSL=True,
-    MAIL_USERNAME='robins99.k@gmail.com',
-    MAIL_PASSWORD='H@robins1'
+    MAIL_USERNAME='robins19.k@gmail.com',
+    MAIL_PASSWORD='Robins@08'
 )
 app.secret_key='ghjhjhq/213763fbf'
 
@@ -147,10 +146,15 @@ def register():
 
     else:
         return 'already registered'
+#@app.route('/google')
+#def google():
+    #path='D:/Demo/as.jpg'
+    #return send_file(path,mimetype='image/jpg',as_attachment=True)
+    #(iske use se hum kahi se bhi kisi file ko iss directory se download karwa sakte hai)
+
 @app.route('/google')
 def google():
-    path='F:/files/as.jpg'
-    return send_file(path,mimetype='image/jpg',as_attachment=True)
+    return render_template('google.html')
 
 @app.route('/home')
 def home():
@@ -209,56 +213,84 @@ def deleteUrl():
         return redirect('/home')
     return render_template('login.html')
 
-@app.route('/mailbhejo')
-def mailbhejo():
-    new=str(otp)
-    msg= Message(subject='mail sender', sender='robins99.k@gmail.com', recipients=['robins20.k@gmail.com'],body=new)
-    msg.cc=['robins20.k@gmail.com']
-   # msg.html=render_template('index.html')
-   # with app.open_resource("D:/mail/1.png") as f:
-    #    msg.attach("1.png","image/png",f.read())
-    mail.send(msg)
-    return render_template('OTP.html')
-
-#@app.route('/mailbhejo')
-#def mailbhejo():
- #   msg = Message(subject='mail sender', sender='robins99.k@gmail.com', recipients=['robins20.k@gmail.com'], body=otp)
- #   msg.cc = ['robins20.k@gmail.com']
- #   mail.send(msg)
-  #  return "mail sent!!"
 
 @app.route('/logout')
 def logout():
     session.pop('userid',None)
     return render_template('login.html')
 
+
+@app.route('/askemail')
+def askemail():
+    return render_template('askemail.html')
+
 @app.route('/forget')
-def forget():
-    return render_template('forget.html')
-@app.route('/forget',methods=['POST'])
-def reset():
-    global otp
-    email = request.form['email']
-    otp=randint(1111,9999)
+def forgetpassword():
+    email = request.args.get('email')
+    randomnumber = ''
+    letter = string.digits
+    for i in range(6):
+        randomnumber = randomnumber + ''.join(random.choice(letter))
+    body = 'Your forget password OTP is ' + randomnumber
+    msg = Message(subject='Forget Password Email ', sender='robins19.k@gmail.com',
+                  recipients=[email], body=body)
+    msg.cc = [email]
+    mail.send(msg)
+    connection = connect(host="localhost", database="student", user="root", password="Robins",port='3305')
+    cur = connection.cursor()
+    query2 = "select * from userdetails where emailId='{}'".format(email)
+    cur.execute(query2)
+    data = cur.fetchone()
+    if data == None:
+        return "You are not registered"
+    query1 = "update userdetails set otp ='{}' where emailId= '{}'".format(randomnumber, email)
+    cur.execute(query1)
+    connection.commit()
+    return render_template('updatepassword.html', email=email)
+
+@app.route('/updatepassword')
+def updatepassword():
+    emailId = request.args.get('email')
+    otp = request.args.get('otp')
+    pwd = request.args.get('pwd')
     connection = connect(host="localhost", database="student", user="root", password="Robins", port='3305')
     cur = connection.cursor()
-    query = "insert into reset(email,otp) values('{}','{}')".format(email,otp)
-    cur = connection.cursor()
-    cur.execute(query)
-    connection.commit()
-    return redirect('/mailbhejo')
-
-@app.route('/mailbhejo',methods=['POST'])
-def mail1():
-    OTP = request.form['OTP']
-    otp1=int(OTP)
-    if otp1==otp:
-        return render_template('ResetPassword.html')
+    query1 = "select * from userdetails where emailId='{}'".format(emailId)
+    cur.execute(query1)
+    data = cur.fetchone()
+    print(data)
+    if int(data[8])==int(otp):
+        query2 = "update userdetails set password ='{}' where emailId= '{}'".format(pwd,emailId)
+        cur.execute(query2)
+        connection.commit()
+        return "Your password has been successfully changed"
     else:
-        return "Wrong OTP"
+        return "Worng OTP"
 
-    return render_template('ResetPassword.html')
+@app.route('/apitest',methods=['post'])
+def api():
+    abc1=request.get_json()
+    print(abc1)
+    list=[]
+    da={}
+    connection = connect(host="localhost", database="student", user="root", password="Robins", port='3305')
+    cur=connection.cursor()
+    query="select * from urlinfo"
+    cur.execute(query)
+    data=cur.fetchall()
+    for i in data:
+        da["name"]=i[0]
+        da["email"]=i[1]
+        list.append(da)
+    dict={'name':"Robins"}
+    return jsonify(list)
 
+@app.route('/apitest1',methods=['post'])
+def api1():
+    abc1=request.get_json()
+    print(abc1)
+    dict={'name':"Robins"}
+    return jsonify(dict)
 
 
 
